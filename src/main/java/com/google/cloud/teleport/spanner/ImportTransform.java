@@ -148,6 +148,8 @@ public class ImportTransform extends PTransform<PBegin, PDone> {
             "Create Cloud Spanner Tables",
             new CreateTables(spannerConfig, avroDdlView, informationSchemaView));
 
+    ddl.apply("Create Indexes", new CreateIndexesTransform(spannerConfig, waitForIndexes));
+
     PCollectionView<Ddl> ddlView = ddl.apply("Cloud Spanner DDL as view", View.asSingleton());
 
     PCollectionView<HashMultimap<Integer, String>> levelsView =
@@ -225,8 +227,8 @@ public class ImportTransform extends PTransform<PBegin, PDone> {
                       .withGroupingFactor(100));
       previousComputation = result.getOutput();
     }
-    ddl.apply(Wait.on(previousComputation))
-        .apply("Create Indexes", new CreateIndexesTransform(spannerConfig, waitForIndexes));
+//    ddl.apply(Wait.on(previousComputation))
+//        .apply("Create Indexes", new CreateIndexesTransform(spannerConfig, waitForIndexes));
     return PDone.in(begin.getPipeline());
   }
 
